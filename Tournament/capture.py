@@ -606,6 +606,7 @@ def readCommand( argv ):
   parser.add_option('-l', '--layout', dest='layout',
                     help=default('the LAYOUT_FILE from which to load the map layout; use RANDOM for a random maze; use RANDOM<seed> to use a specified random seed, e.g., RANDOM23'),
                     metavar='LAYOUT_FILE', default='defaultCapture')
+  parser.add_option('--frameTime', type='int')
   parser.add_option('-t', '--textgraphics', action='store_true', dest='textgraphics',
                     help='Display output as text only', default=False)
 
@@ -615,7 +616,6 @@ def readCommand( argv ):
   parser.add_option('-Q', '--super-quiet', action='store_true', dest="super_quiet",
                     help='Same as -q but agent output is also suppressed', default=False)
 
-  parser.add_option('--frameTime', type='float',dest='frameTime')
   parser.add_option('-z', '--zoom', type='float', dest='zoom',
                     help=default('Zoom in the graphics'), default=1)
   parser.add_option('-i', '--time', type='int', dest='time',
@@ -655,7 +655,7 @@ def readCommand( argv ):
     import captureGraphicsDisplay
     # Hack for agents writing to the display
     captureGraphicsDisplay.FRAME_TIME = 0
-    args['display'] = captureGraphicsDisplay.PacmanGraphics(options.red, options.blue, options.zoom, options.frameTime, capture=True)
+    args['display'] = captureGraphicsDisplay.PacmanGraphics(options.red, options.blue, options.zoom, 0, capture=True)
     import __main__
     __main__.__dict__['_display'] = args['display']
 
