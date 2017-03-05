@@ -16,7 +16,7 @@ import game
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'DummyAgent', second = 'DummyAgent'):
+               first = 'Agent1', second = 'Agent2'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -38,6 +38,31 @@ def createTeam(firstIndex, secondIndex, isRed,
 ##########
 # Agents #
 ##########
+
+class Agent1(CaptureAgent):
+
+  # get initial state
+  def registerIntialState(self,gameState):
+    CaptureAgent.registerInitialState(self, gameState)
+
+  # choose Action of gamestate
+  # how to make a good agent
+  def chooseAction(self,gameState):
+    "fill this in with good content"
+
+    actions     = gameState.getLegalActions(self.index)
+    values      = [(self.evaluate(gameState, action),action) for action in actions]
+    bestAction  = max(values)
+
+    return values[1]
+
+
+
+
+
+
+
+
 
 class DummyAgent(CaptureAgent):
   """
