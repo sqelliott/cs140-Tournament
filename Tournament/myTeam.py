@@ -10,14 +10,15 @@ from captureAgents import CaptureAgent
 import random, time, util
 from game import Directions
 import game
-from qlearningAgents import *
+from util import *
+import datetime
 
 #################
 # Team creation #
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'Agent1', second = 'Agent1'):
+               first = 'Agent1', second = 'DummyAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -40,26 +41,25 @@ def createTeam(firstIndex, secondIndex, isRed,
 # Agents #
 ##########
 
-class Agent1(CaptureAgent, ApproximateQAgent):
+class Agent1(CaptureAgent):
 
-  def __init__(self,index, timeForComputing = .1, **args):
+  def __init__(self,index, timeForComputing =.1):
     CaptureAgent.__init__(self,index, timeForComputing)
-    ApproximateQAgent.__init__(self, **args)
+    self.epsilon = 0.0
+    self.weights = util.Counter()
+    self.alpha = 0.5
+    self.discountRate = .1
+    self.training = True
+    tmp = self.maintainedWeights()
+    for t in tmp:
+      self.weights[t] = tmp[t]
+    
+
+    if not self.training:
+      self.epsilon = 0
 
 
-  # get initial state
-  def registerIntialState(self,gameState):
-    CaptureAgent.registerInitialState(self, gameState)
-    PacmanQAgent.__init__(self, **args)
 
-
-  # choose Action of gamestate
-  # how to make a good agent
-  def chooseAction(self,gameState):
-    import pdb;pdb.set_trace()
-    "fill this in with good content"
-
-    return self.getAction(gameState)
 
   def getSuccessor(self, gameState, action):
     """
@@ -73,61 +73,76 @@ class Agent1(CaptureAgent, ApproximateQAgent):
     else:
       return successor
 
-  def evaluate(self, gameState, action):
-    """
-    Computes a linear combination of features and feature weights
-    """
-    features = self.getFeatures(gameState, action)
-    weights = self.weights
-    return features * weights
 
 
-  def getFeatures(self, state, action):
-    ### import pdb;pdb.set_trace()
+  "functions to user for learning"
+  def getQValue(self, state, action):
+    return self.weights * self.getFeatures(state,action)
+
+  def getValue(self,state):
+    return self.getQValue(state,self.getPolicy(state))
+
+
+  def getPolicy(self,state):
+    actions = state.getLegalActions(self.index)
+    actionValues = [ (self.getQValue(state,action),action) for action in actions]
+    best = max(actionValues)
+    return best[1]
+
+
+  def getAction(self,state):
+    actions = state.getLegalActions(self.index)
+    action = self.getPolicy(state)
+
+    if util.flipCoin(self.epsilon): 
+      action =  random.choice(actions)
+
+    if self.training: 
+      nextState = self.getSuccessor(state,action)
+      self.update(state,action,nextState)
+    return action
+
+
+  def update(self,state,action,nextState):
+    features = self.getFeatures(state,action)
+    for feature in features:
+      correction = (self.getScore(state) - self.getScore(nextState)) + self.discountRate * self.getValue(nextState) - self.getQValue(state,action)
+      self.weights[feature] += self.alpha * correction * features[feature]
+
+
+  "user this to keep track of training"
+  def final(self, gameState):
+    self.observationHistory = []
+    self.recordWeights()
+
+  "update for better features"
+  def getFeatures(self, gameState, action):
+    """
+    Returns a counter of features for the state
+    """
     features = util.Counter()
-    successor = self.getSuccessor(state, action)
+    successor = self.getSuccessor(gameState, action)
     features['successorScore'] = self.getScore(successor)
 
-    # Compute distance to the nearest food
     foodList = self.getFood(successor).asList()
     if len(foodList) > 0: # This should always be True,  but better safe than sorry
       myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
+
     return features
 
-  def getQValue(self, state, action):
-    """
-      Should return Q(state,action) = w * featureVector
-      where * is the dotProduct operator
-    """
-    """Description:
-    [Enter a description of what you did here.]
+  def maintainedWeights(self):
+    return {'successorScore': 100.0, 'distanceToFood' : -500}
 
-    Using the Counter __mult__ method, just multiply the two counters (weights and features)
-    to perform the dot product operation and get the QValues
-    """
-    """ YOUR CODE HERE """
+  def recordWeights(self):
+    f = open ('weightRecords.txt', 'a')
+    now = datetime.datetime.now()
 
-    return  self.weights * (self.getFeatures(state,action))
-
-  def getAction(self, state):
-    #import pdb;pdb.set_trace()
-    legalActions = self.getLegalActions(state)
-    action = None
-
-    # check for no legal actions
-    if len(legalActions) == 0: return None
-
-    # random action for no policy
-    action = self.getPolicy(state)
-
-    # return random action that 
-    if util.flipCoin(self.epsilon):
-       return random.choice(legalActions) 
-    
-    # return policy
-    return action
+    f.write(now.strftime("%m-%d %H:%M")+" ")
+    for w in self.weights:
+      f.write("{ "+w+":"+str(self.weights[w])+" } ")
+    f.write("\n")
 
 
 
