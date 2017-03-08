@@ -53,6 +53,9 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     if self.getMazeDistance(myPos, t) <2:
       features['teamAttackDist'] = self.getMazeDistance(myPos,t)
 
+    # make a feature to send pacman to a good start location
+    # middle of map at start
+
 
 
     return features

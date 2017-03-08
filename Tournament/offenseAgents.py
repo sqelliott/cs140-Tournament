@@ -1,6 +1,6 @@
 # Offense Agents.py
 
-from reflexAgent import *
+from reflexAgent import ReflexCaptureAgent
 import random, time, util
 from game import Directions
 import game
@@ -50,7 +50,13 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
         features['teamAttackDist'] = self.getMazeDistance(myPos,t)
 
 
+    # promote not stoping
+    # should have feature that promotes exploring different areas
+    # after having a high distrution in an area
     if action == Directions.STOP: features['stop'] = 1
+
+
+    # MUST MAKE FEATURE TO CHANGE ACTIONS ON SCARED GHOSTS!!!!!!
   
     return features
 
