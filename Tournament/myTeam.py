@@ -103,6 +103,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
   but it is by no means the best or only way to build an offensive agent.
   """
   def getFeatures(self, gameState, action):
+    # score feature
     features = util.Counter()
     successor = self.getSuccessor(gameState, action)
     features['successorScore'] = self.getScore(successor)
@@ -113,10 +114,21 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
       myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
+
+    # avoid an enemy ghost while on enemy side
+    enemies   = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+    ghosts    = [a for a in enemies if not a.isPacman and a.getPosition() != None]
+    num_ghost = len(ghosts)
+    if num_ghost > 0:
+      dist = [self.getMazeDistance(myPos,a.getPosition()) for a in ghosts]
+      features['ghostDist'] = min(dist)
+
+    
+     
     return features
 
   def getWeights(self, gameState, action):
-    return {'successorScore': 100, 'distanceToFood': -1}
+    return {'successorScore': 100, 'distanceToFood': -4, 'ghostDist': 1}
 
 class DefensiveReflexAgent(ReflexCaptureAgent):
   """

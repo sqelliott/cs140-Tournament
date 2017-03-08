@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -e solution.zip ]
+then
+   echo "remove solution.zip"
+   rm solution.zip
+fi
+zip solution.zip myTeam.py name.txt 
