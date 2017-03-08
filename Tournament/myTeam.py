@@ -19,7 +19,7 @@ from util import *
 
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'OffensiveReflexAgent', second = 'DefensiveReflexAgent'):
+               first = 'OffensiveReflexAgent', second = 'OffensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -44,6 +44,10 @@ class ReflexCaptureAgent(CaptureAgent):
   """
   A base class for reflex agents that chooses score-maximizing actions
   """
+  def registerInitialState(self,gameState):
+    CaptureAgent.registerInitialState(self,gameState)
+    self.index2 = (self.index + 2) % 4
+
   def chooseAction(self, gameState):
     """
     Picks among the actions with the highest Q(s,a).
@@ -104,14 +108,19 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
   """
   def getFeatures(self, gameState, action):
     # score feature
-    features = util.Counter()
+    features  = util.Counter()
     successor = self.getSuccessor(gameState, action)
     features['successorScore'] = self.getScore(successor)
+    me        = successor.getAgentState(self.index)
+    myPos     = me.getPosition()
+    "info to get teammate information"
+    teammate  = successor.getAgentState(self.index2)
+    teammPos  = teammate.getPosition()
+
 
     # Compute distance to the nearest food
     foodList = self.getFood(successor).asList()
     if len(foodList) > 0: # This should always be True,  but better safe than sorry
-      myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
 
@@ -121,14 +130,26 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     num_ghost = len(ghosts)
     if num_ghost > 0:
       dist = [self.getMazeDistance(myPos,a.getPosition()) for a in ghosts]
-      features['ghostDist'] = min(dist)
+      if min(dist) < 4:
+        features['ghostDist'] = min(dist)
+      else:
+        features['ghostDist'] = 0
+
+    # if both agents are pacman, make them 
+    # stay away each other
+    if teammate.isPacman and  me.isPacman:
+      t = teammate.getPosition()
+      features['teamAttackDist'] = self.getMazeDistance(myPos, t)
 
     
      
     return features
 
   def getWeights(self, gameState, action):
-    return {'successorScore': 100, 'distanceToFood': -4, 'ghostDist': 1}
+    return {'successorScore': 100, 
+            'distanceToFood': -4, 
+            'ghostDist': 5,
+            'teamAttackDist':3}
 
 class DefensiveReflexAgent(ReflexCaptureAgent):
   """
@@ -161,7 +182,20 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
     if action == rev: features['reverse'] = 1
 
+    # make agent go to capsules we are defending
+    team_capsules   = self.getCapsulesYouAreDefending(successor)
+    caps            = [self.getMazeDistance(myPos,q) for q in team_capsules]
+    if len(caps) >0:
+      features['teamCapDist'] = min (caps)
+
+
+
     return features
 
   def getWeights(self, gameState, action):
-    return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
+    return {'numInvaders': -100, 
+            'onDefense': 000, 
+            'invaderDistance': -10, 
+            'stop': -100, 
+            'reverse': -20,
+            'teamCapDist':-3}
