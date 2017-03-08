@@ -12,13 +12,14 @@ from game import Directions
 import game
 from util import *
 import datetime
+import math
 
 #################
 # Team creation #
 #################
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'Agent1', second = 'DummyAgent'):
+               first = 'Agent1', second = 'Agent1'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
@@ -45,11 +46,11 @@ class Agent1(CaptureAgent):
 
   def __init__(self,index, timeForComputing =.1):
     CaptureAgent.__init__(self,index, timeForComputing)
-    self.epsilon = 0.0
+    self.epsilon = 0.05
     self.weights = util.Counter()
     self.alpha = 0.5
-    self.discountRate = .1
-    self.training = True
+    self.discountRate = 1
+    self.training = False
     tmp = self.maintainedWeights()
     for t in tmp:
       self.weights[t] = tmp[t]
@@ -77,7 +78,9 @@ class Agent1(CaptureAgent):
 
   "functions to user for learning"
   def getQValue(self, state, action):
-    return self.weights * self.getFeatures(state,action)
+    qValue = self.weights * self.getFeatures(state,action)
+    if math.isnan(qValue): import pdb;pdb.set_trace()
+    return qValue
 
   def getValue(self,state):
     return self.getQValue(state,self.getPolicy(state))
@@ -106,8 +109,10 @@ class Agent1(CaptureAgent):
   def update(self,state,action,nextState):
     features = self.getFeatures(state,action)
     for feature in features:
-      correction = (self.getScore(state) - self.getScore(nextState)) + self.discountRate * self.getValue(nextState) - self.getQValue(state,action)
+      reward = self.getScore(state) - self.getScore(nextState) - 1 # negative living reward
+      correction = (reward) + self.discountRate * self.getValue(nextState) - self.getQValue(state,action)
       self.weights[feature] += self.alpha * correction * features[feature]
+      if math.isnan(self.weights[feature]): import pdb;pdb.set_trace()
 
 
   "user this to keep track of training"
@@ -121,6 +126,7 @@ class Agent1(CaptureAgent):
     Returns a counter of features for the state
     """
     features = util.Counter()
+    features['bias'] = 1
     successor = self.getSuccessor(gameState, action)
     features['successorScore'] = self.getScore(successor)
 
@@ -130,10 +136,19 @@ class Agent1(CaptureAgent):
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
 
+    "promote distance for offense"
+    # import pdb;pdb.set_trace()
+    # team = self.getTeam(successor)
+    # for t in team:
+    #   if t != self.index: b = t
+    # teamPos = successor.getAgentState(b).getPosition()
+    # d = self.getMazeDistance(myPos,teamPos)
+    # features['off_team_dist'] = d
+
     return features
 
   def maintainedWeights(self):
-    return {'successorScore': 100.0, 'distanceToFood' : -500}
+    return {'successorScore': 100.0, 'distanceToFood' : -5,  'bias':1}
 
   def recordWeights(self):
     f = open ('weightRecords.txt', 'a')
