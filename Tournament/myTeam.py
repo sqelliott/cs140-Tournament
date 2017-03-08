@@ -49,8 +49,8 @@ class Agent1(CaptureAgent):
     self.epsilon = 0.05
     self.weights = util.Counter()
     self.alpha = 0.5
-    self.discountRate = 1
-    self.training = False
+    self.discountRate = .01
+    self.training = True 
     tmp = self.maintainedWeights()
     for t in tmp:
       self.weights[t] = tmp[t]
@@ -79,7 +79,6 @@ class Agent1(CaptureAgent):
   "functions to user for learning"
   def getQValue(self, state, action):
     qValue = self.weights * self.getFeatures(state,action)
-    if math.isnan(qValue): import pdb;pdb.set_trace()
     return qValue
 
   def getValue(self,state):
@@ -112,7 +111,6 @@ class Agent1(CaptureAgent):
       reward = self.getScore(state) - self.getScore(nextState) - 1 # negative living reward
       correction = (reward) + self.discountRate * self.getValue(nextState) - self.getQValue(state,action)
       self.weights[feature] += self.alpha * correction * features[feature]
-      if math.isnan(self.weights[feature]): import pdb;pdb.set_trace()
 
 
   "user this to keep track of training"
@@ -126,7 +124,6 @@ class Agent1(CaptureAgent):
     Returns a counter of features for the state
     """
     features = util.Counter()
-    features['bias'] = 1
     successor = self.getSuccessor(gameState, action)
     features['successorScore'] = self.getScore(successor)
 
@@ -148,7 +145,7 @@ class Agent1(CaptureAgent):
     return features
 
   def maintainedWeights(self):
-    return {'successorScore': 100.0, 'distanceToFood' : -5,  'bias':1}
+    return {'successorScore': 0, 'distanceToFood' : 0}
 
   def recordWeights(self):
     f = open ('weightRecords.txt', 'a')
