@@ -1,3 +1,59 @@
 
 03-07 22:53 { distanceToFood:nan } { successorScore:nan } 
 03-07 22:53 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:07 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:08 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:12 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:12 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:14 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:14 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:17 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:17 { distanceToFood:nan } { successorScore:nan } 
+03-07 23:20 { distanceToFood:-4.82532412531e+150 } { successorScore:-3.15005599578e+152 } 
+03-07 23:20 { distanceToFood:-7.96567464731e+289 } { successorScore:-6.57455918666e+291 } 
+03-07 23:23 { distanceToFood:-1000 } { successorScore:-1000 } 
+03-07 23:23 { distanceToFood:-1000 } { successorScore:-1000 } 
+03-07 23:26 { distanceToFood:0.0 } { successorScore:0.0 } 
+03-07 23:26 { distanceToFood:0.0 } { successorScore:0.0 } 
+03-07 23:29 { distanceToFood:-1000 } { successorScore:-1000 } 
+03-07 23:29 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:30 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:30 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:31 { distanceToFood:-1000 } { successorScore:-1000 } 
+03-07 23:31 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:32 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:32 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:33 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:33 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:35 { distanceToFood:-1000 } { successorScore:-1000 } 
+03-07 23:35 { distanceToFood:1000 } { successorScore:1000 } 
+03-07 23:38 { distanceToFood:1 } 
+03-07 23:38 { distanceToFood:1 } 
+03-07 23:39 { distanceToFood:-1 } 
+03-07 23:39 { distanceToFood:-1 } 
+03-07 23:42 { distanceToFood:-1 } { stop:-100 } 
+03-07 23:42 { distanceToFood:-1 } { stop:-100 } 
+03-07 23:44 { distanceToFood:1000 } { stop:-100 } 
+03-07 23:44 { distanceToFood:1000 } { stop:-58.55 } 
+03-07 23:47 { distanceToFood:-1 } { stop:-100 } { successorScore:100 } 
+03-07 23:47 { distanceToFood:-1 } { stop:-100 } { successorScore:100 } 
+03-07 23:51 { distanceToFood:1000 } { stop:-339.0 } { successorScore:1000 } 
+03-07 23:51 { distanceToFood:1000 } { stop:-335.0 } { successorScore:1000 } 
