@@ -1,90 +1,8 @@
-# myTeam.py
-# ---------
-# Licensing Information: Please do not distribute or publish solutions to this
-# project. You are free to use and extend these projects for educational
-# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
-# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
-# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
-
-from captureAgents import CaptureAgent
-import random, time, util
+from util import manhattanDistance
 from game import Directions
-import game
+import random, util
 
 from game import Agent
-
-#################
-# Team creation #
-#################
-
-def createTeam(firstIndex, secondIndex, isRed,
-               first = 'AlphaBetaAgent', second = 'DummyAgent'):
-  """
-  This function should return a list of two agents that will form the
-  team, initialized using firstIndex and secondIndex as their agent
-  index numbers.  isRed is True if the red team is being created, and
-  will be False if the blue team is being created.
-
-  As a potentially helpful development aid, this function can take
-  additional string-valued keyword arguments ("first" and "second" are
-  such arguments in the case of this function), which will come from
-  the --redOpts and --blueOpts command-line arguments to capture.py.
-  For the nightly contest, however, your team will be created without
-  any extra arguments, so you should make sure that the default
-  behavior is what you want for the nightly contest.
-  """
-
-  # The following line is an example only; feel free to change it.
-  return [eval(first)(firstIndex), eval(second)(secondIndex)]
-
-##########
-# Agents #
-##########
-
-class DummyAgent(CaptureAgent):
-  """
-  A Dummy agent to serve as an example of the necessary agent structure.
-  You should look at baselineTeam.py for more details about how to
-  create an agent as this is the bare minimum.
-  """
-
-  def registerInitialState(self, gameState):
-    """
-    This method handles the initial setup of the
-    agent to populate useful fields (such as what team
-    we're on). 
-    
-    A distanceCalculator instance caches the maze distances
-    between each pair of positions, so your agents can use:
-    self.distancer.getDistance(p1, p2)
-
-    IMPORTANT: This method may run for at most 15 seconds.
-    """
-
-    ''' 
-    Make sure you do not delete the following line. If you would like to
-    use Manhattan distances instead of maze distances in order to save
-    on initialization time, please take a look at
-    CaptureAgent.registerInitialState in captureAgents.py. 
-    '''
-    CaptureAgent.registerInitialState(self, gameState)
-
-    ''' 
-    Your initialization code goes here, if you need any.
-    '''
-
-
-  def chooseAction(self, gameState):
-    """
-    Picks among actions randomly.
-    """
-    actions = gameState.getLegalActions(self.index)
-
-    ''' 
-    You should change this in your own agent.
-    '''
-
-    return random.choice(actions)
 
 class MultiAgentSearchAgent(Agent):
   """
@@ -107,7 +25,7 @@ class MultiAgentSearchAgent(Agent):
     self.treeDepth = int(depth)
 
 
-class AlphaBetaAgent(MultiAgentSearchAgent, CaptureAgent):
+class AlphaBetaAgent(MultiAgentSearchAgent):
   """
     Your minimax agent with alpha-beta pruning (question 3)
   """
@@ -186,16 +104,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent, CaptureAgent):
 
 
     
-  def getAction(self, gameState):
+  def getAction(self, gameState, maxDepth):
     """
       Returns the minimax action using self.treeDepth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    maxDepth = 2
     return self.alpha_beta(gameState, maxDepth)
-
-  def chooseAction(self, gameState):
-  	return self.getAction(gameState, 1)
 
 
 
@@ -286,4 +200,9 @@ def betterEvaluationFunction(currentGameState):
 
   r = ghost_component - ((len(foodList) * SCORE_WEIGHT)) + food_component + 1000 #add a bias term to make score positive
   return r
+
+
+
+
+
 
