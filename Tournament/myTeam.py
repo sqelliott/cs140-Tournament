@@ -46,10 +46,10 @@ class Agent1(CaptureAgent):
 
   def __init__(self,index, timeForComputing =.1):
     CaptureAgent.__init__(self,index, timeForComputing)
-    self.epsilon = 0.05
+    self.epsilon = 0.01
     self.weights = util.Counter()
-    self.alpha = 0.5
-    self.discountRate = .01
+    self.alpha = 0.05
+    self.discountRate = .8
     self.training = True 
     tmp = self.maintainedWeights()
     for t in tmp:
@@ -108,9 +108,14 @@ class Agent1(CaptureAgent):
   def update(self,state,action,nextState):
     features = self.getFeatures(state,action)
     for feature in features:
-      reward = self.getScore(state) - self.getScore(nextState) - 1 # negative living reward
+      import pdb;pdb.set_trace()
+      reward = -self.getScore(state) + self.getScore(nextState) 
       correction = (reward) + self.discountRate * self.getValue(nextState) - self.getQValue(state,action)
       self.weights[feature] += self.alpha * correction * features[feature]
+      self.weights[feature] = max( -CAP, min(self.weights[feature],CAP))
+      f = open("weightUpdates.txt", 'a')
+      f.write(feature+" " +str(self.weights[feature]) +" ")
+    f.write("\n")
 
 
   "user this to keep track of training"
@@ -133,6 +138,7 @@ class Agent1(CaptureAgent):
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
 
+    if action == Directions.STOP: features['stop'] = 1
     "promote distance for offense"
     # import pdb;pdb.set_trace()
     # team = self.getTeam(successor)
@@ -145,7 +151,7 @@ class Agent1(CaptureAgent):
     return features
 
   def maintainedWeights(self):
-    return {'successorScore': 0, 'distanceToFood' : 0}
+    return {'successorScore':100, 'distanceToFood' : -1, 'stop':-100}
 
   def recordWeights(self):
     f = open ('weightRecords.txt', 'a')
@@ -208,3 +214,7 @@ class DummyAgent(CaptureAgent):
 
     return random.choice(actions)
 
+
+
+"stuff"
+CAP = 1000
