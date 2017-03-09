@@ -36,11 +36,12 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     ghosts    = [a for a in enemies if not a.isPacman and a.getPosition() != None]
     num_ghost = len(ghosts)
     if num_ghost > 0:
-      dist = [self.getMazeDistance(myPos,a.getPosition()) for a in ghosts]
-      if min(dist) < 4:
+      dist = [(self.getMazeDistance(myPos,a.getPosition()), a) for a in ghosts]
+      if min(dist) < 7 and a.scaredTimer<2:
         features['ghostDist'] = min(dist)
       else:
         features['ghostDist'] = 0
+
 
     # if both agents are pacman, make them 
     # stay away each other
@@ -50,6 +51,20 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
         features['teamAttackDist'] = self.getMazeDistance(myPos,t)
 
 
+    #capsule feature to get close if close by
+    cap_dist = [self.getMazeDistance(myPos,a) for a in self.capsules]
+    if len(cap_dist)>0:
+    	if min(cap_dist) < 8:
+    		features['capsule'] = min(cap_dist)
+
+    # eat opponent pacman while in ghost state
+    if not me.isPacman:
+    	if num_ghost>0: 
+    		if min(dist) <4:
+    			features['off_ghost_state'] = 1
+    
+
+
     # promote not stoping
     # should have feature that promotes exploring different areas
     # after having a high distrution in an area
@@ -57,6 +72,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 
 
     # MUST MAKE FEATURE TO CHANGE ACTIONS ON SCARED GHOSTS!!!!!!
+    
   
     return features
 
@@ -65,7 +81,9 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
             'distanceToFood': -5, 
             'ghostDist': 15,
             'teamAttackDist':5,
-            'stop': -100}
+            'stop': -100,
+            'cap_dist':2,
+            'off_ghost_state':10}
 
 
 
