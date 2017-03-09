@@ -32,9 +32,17 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
       features['distanceToFood'] = minDistance
 
     # avoid an enemy ghost while on enemy side
-    enemies   = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+    for i in self.getOpponents(successor):
+      a = successor.getAgentState(i)
+      enemies.append(a)
+      if a.isPacman and a.getPosition() != None:
+        self.offOpps[i] += 1
+
+
     ghosts    = [a for a in enemies if not a.isPacman and a.getPosition() != None]
     num_ghost = len(ghosts)
+
+
     if num_ghost > 0:
       dist = [(self.getMazeDistance(myPos,a.getPosition()), a) for a in ghosts]
       if min(dist) < 7 and a.scaredTimer<2:
@@ -61,7 +69,11 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     if not me.isPacman:
     	if num_ghost>0: 
     		if min(dist) <4:
-    			features['off_ghost_state'] = 1
+    			features['offGhostState'] = 1
+
+
+
+
     
 
 
@@ -71,7 +83,6 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     if action == Directions.STOP: features['stop'] = 1
 
 
-    # MUST MAKE FEATURE TO CHANGE ACTIONS ON SCARED GHOSTS!!!!!!
     
   
     return features
@@ -83,7 +94,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
             'teamAttackDist':5,
             'stop': -100,
             'cap_dist':2,
-            'off_ghost_state':10}
+            'offGhostState':10}
 
 
 

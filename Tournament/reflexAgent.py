@@ -15,11 +15,11 @@ class ReflexCaptureAgent(CaptureAgent):
   def registerInitialState(self,gameState):
     CaptureAgent.registerInitialState(self,gameState)
     self.index2 = (self.index + 2) % 4
-    side = -2
+    if self.red: side = -2
+    else: side =2 
 
     #init which opponents are guessed to be offensive agents
-    self.offensiveOpponenets = []
-
+    self.offOpps = {}
     self.defensiveOpenings = []
 
 
@@ -34,28 +34,19 @@ class ReflexCaptureAgent(CaptureAgent):
     #find the opening closest to the middle
     self.middleOpening = (centerLine, 0)
 
-    print centerLine
 
     for i in range(1, gameBoardHeight-1):
       if not walls[centerLine][i] and not walls[centerLine + side][i]:
         self.defensiveOpenings.append((centerLine + side, i))
 
     dist = []
-    print 'Ideal Middle: '
     for (doX, doY) in self.defensiveOpenings:
       d = abs(gameBoardHeight/2 - doY)
-      print (d, (doX, doY))
       dist.append((d, (doX, doY)))
 
     self.middleOpening = min(dist)[1]
-    print 'Middle Opening: ', self.middleOpening
 
-
-    print 'Walls: '
-    for t in self.defensiveOpenings:
-      print t
-
-    
+   
 
     self.capsules = gameState.getCapsules()
 
