@@ -39,6 +39,24 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
       if a.isPacman and a.getPosition() != None:
         self.offOpps[i] += 1
 
+    # make offense agent avoid y-axis of predicted defense agent
+    key = None
+    i   = None
+    for k in self.offOpps:
+      if key == None:
+        key = k
+        i = self.offOpps[k]
+      elif i > self.offOpps[k]:
+        key = k
+        i = self.offOpps[k]
+    if successor.getAgentState(i).getPosition() != None:
+      iPos    = successor.getAgentState(i).getPosition()
+      absDiff = abs(myPos[1] - iPos[1])
+      features['avoidDefY'] = absDiff
+
+
+
+
 
     ghosts    = [a for a in enemies if not a.isPacman and a.getPosition() != None]
     num_ghost = len(ghosts)
@@ -95,7 +113,8 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
             'teamAttackDist':5,
             'stop': -100,
             'cap_dist':2,
-            'offGhostState':10}
+            'offGhostState':10,
+            'avoidDefY': 4}
 
 
 
