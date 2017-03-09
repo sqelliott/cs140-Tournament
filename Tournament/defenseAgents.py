@@ -46,6 +46,9 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
 
     features['middleOpening'] = self.getMazeDistance(myPos, self.middleOpening)
 
+    # punish defense for being pacman/on opposite side
+    if a.isPacman: features['remainGhost'] = 1
+
     dOpenings = [self.getMazeDistance(myPos,q) for q in self.defensiveOpenings]
     if len(dOpenings) > 0:
       features['defensiveOpenings'] = min (dOpenings)
@@ -66,9 +69,10 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
   def getWeights(self):
     return {'numInvaders': -200, 
             'onDefense': 000, 
-            'invaderDistance': -20, 
+            'invaderDistance': -100, 
             'defensiveOpenings': -1,
             'middleOpening': -5,
             'stop': -10, 
-            'reverse': -20,
-            'teamAttackdist': 1}
+            'reverse': -00,
+            'teamAttackdist': 1,
+            'remainGhost': -2}
