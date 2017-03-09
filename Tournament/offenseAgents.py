@@ -102,7 +102,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 
   def final(self, gameState):
     self.observationHistory= []
-    self.recordResults(gameState)
+    #self.recordResults(gameState)
 
 
 
