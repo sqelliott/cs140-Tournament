@@ -21,6 +21,7 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
 
     me = successor.getAgentState(self.index)
     myPos = me.getPosition()
+
     "info to get teammate information"
     teammate  = successor.getAgentState(self.index2)
     teammPos  = teammate.getPosition()
@@ -42,10 +43,9 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     if action == rev: features['reverse'] = 1
 
     # make agent go to capsules we are defending
-    team_capsules   = self.getCapsulesYouAreDefending(successor)
-    caps            = [self.getMazeDistance(myPos,q) for q in team_capsules]
-    if len(caps) >0:
-      features['teamCapDist'] = min (caps)
+    dOpenings = [self.getMazeDistance(myPos,q) for q in self.defensiveOpenings]
+    if len(dOpenings) > 0:
+      features['defensiveOpenings'] = min (dOpenings)
 
 
     # team distance maintanence
@@ -64,7 +64,8 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     return {'numInvaders': -100, 
             'onDefense': 000, 
             'invaderDistance': -10, 
+            'defensiveOpenings': -3
             'stop': -100, 
             'reverse': -20,
-            'teamCapDist':-3,
+            'defensiveOpenings': -3,
             'teamAttackdist': 1}

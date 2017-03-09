@@ -15,6 +15,28 @@ class ReflexCaptureAgent(CaptureAgent):
   def registerInitialState(self,gameState):
     CaptureAgent.registerInitialState(self,gameState)
     self.index2 = (self.index + 2) % 4
+    self.capsules = gameState.getCapsules()
+    
+
+    #init which opponents are guessed to be offensive agents
+    self.offensiveOpponenets = []
+
+    self.defensiveOpenings = []
+
+    walls = gamestate.getWalls()
+
+    gameBoardHeight= len(walls[0])
+    gameBoardWidth = len(walls)
+
+    centerLine = gameBoardWidth/2
+
+    for i in range(0, gameBoardHeight):
+      if walls[centerLine][i]:
+        self.defensiveOpenings.append((centerLine, i))
+
+
+    
+
 
   def chooseAction(self, gameState):
     """
