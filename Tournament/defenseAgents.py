@@ -43,6 +43,9 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     if action == rev: features['reverse'] = 1
 
     # make agent go to capsules we are defending
+
+    features['middleOpening'] = self.getMazeDistance(myPos, self.middleOpening)
+
     dOpenings = [self.getMazeDistance(myPos,q) for q in self.defensiveOpenings]
     if len(dOpenings) > 0:
       features['defensiveOpenings'] = min (dOpenings)
@@ -61,11 +64,11 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
     return features
 
   def getWeights(self):
-    return {'numInvaders': -100, 
+    return {'numInvaders': -200, 
             'onDefense': 000, 
-            'invaderDistance': -10, 
-            'defensiveOpenings': -3
-            'stop': -100, 
+            'invaderDistance': -20, 
+            'defensiveOpenings': -1,
+            'middleOpening': -5,
+            'stop': -10, 
             'reverse': -20,
-            'defensiveOpenings': -3,
             'teamAttackdist': 1}
