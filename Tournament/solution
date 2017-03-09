@@ -5,4 +5,4 @@ then
    echo "remove solution.zip"
    rm solution.zip
 fi
-zip solution.zip myTeam.py name.txt defenseAgents.py offenseAgents.py reflexAgent.py
+zip solution.zip myTeam.py name.txt

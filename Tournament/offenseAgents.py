@@ -114,7 +114,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
             'stop': -100,
             'cap_dist':2,
             'offGhostState':10,
-            'avoidDefY': 4}
+            'avoidDefY': 7}
 
 
 
