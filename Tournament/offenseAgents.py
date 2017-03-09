@@ -32,6 +32,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
       features['distanceToFood'] = minDistance
 
     # avoid an enemy ghost while on enemy side
+    enemies = []
     for i in self.getOpponents(successor):
       a = successor.getAgentState(i)
       enemies.append(a)

@@ -19,7 +19,7 @@ class ReflexCaptureAgent(CaptureAgent):
     else: side =2 
 
     #init which opponents are guessed to be offensive agents
-    self.offOpps = {}
+    self.offOpps = util.Counter()
     self.defensiveOpenings = []
 
 
