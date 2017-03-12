@@ -589,6 +589,8 @@ class Game:
     numAgents = len( self.agents )
 
     while not self.gameOver:
+      import time
+      time.sleep(.05) # delays for 5 seconds
       # Fetch the next agent
       agent = self.agents[agentIndex]
       move_time = 0

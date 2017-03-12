@@ -36,10 +36,6 @@ class ReflexCaptureAgent(CaptureAgent):
     self.offOpps[(self.index+1)%4]=0
     self.offOpps[(self.index+3)%4]=0
     self.defensiveOpenings = []
-    self.defOpps = util.Counter()
-    self.defOpps[(self.index+1)%4]=0
-    self.defOpps[(self.index+3)%4]=0
-
 
 
     walls = gameState.getWalls()
@@ -47,27 +43,17 @@ class ReflexCaptureAgent(CaptureAgent):
     gameBoardHeight= walls.height
     gameBoardWidth = walls.width
 
-    self.bothOffense = False
-
     centerLine = gameBoardWidth/2
-    self.cLine = centerLine + side
+
 
     #find the opening closest to the middle
     self.middleOpening = (centerLine, 0)
 
-    lastNotOpening = 0
-    lastOpening = -1
+
     for i in range(1, gameBoardHeight-1):
       if not walls[centerLine][i] and not walls[centerLine + side][i]:
-        #dont duplicate openings
-        if lastNotOpening - lastOpening > 0:
-            self.defensiveOpenings.append((centerLine + side, i))
-            lastOpening = i
-      else: 
-         lastNotOpening = i
+        self.defensiveOpenings.append((centerLine + side, i))
 
-    if len(self.defensiveOpenings) > 2:
-       self.bothOffense = True
     dist = []
     for (doX, doY) in self.defensiveOpenings:
       d = abs(gameBoardHeight/2 - doY)
@@ -143,226 +129,76 @@ class DefensiveReflexAgent(ReflexCaptureAgent):
   
 
   def getFeatures(self, gameState, action):
+    features = util.Counter()
+    successor = self.getSuccessor(gameState, action)
+
+    me = successor.getAgentState(self.index)
+    myPos = me.getPosition()
+
+    "info to get teammate information"
+    teammate  = successor.getAgentState(self.index2)
+    teammPos  = teammate.getPosition()
+
+    # Computes whether we're on defense (1) or offense (0)
+    features['onDefense'] = 1
+    if me.isPacman: features['onDefense'] = 0
+
+    # Computes distance to invaders we can see
+    enemies = [(i, successor.getAgentState(i)) for i in self.getOpponents(successor)]
+    invaders = [a for a in enemies if a[1].isPacman and a[1].getPosition() != None]
+    features['numInvaders'] = len(invaders)
+
+
+    # make agent go to openings we are defending
+    features['middleOpening'] = self.getMazeDistance(myPos, self.middleOpening)
+
     
-    #Choose offense or defense
 
-    if self.bothOffense:
-       # score feature
-       features  = util.Counter()
-       successor = self.getSuccessor(gameState, action)
-       features['successorScore'] = self.getScore(successor)
-       me        = successor.getAgentState(self.index)
-       myPos     = me.getPosition()
-       "info to get teammate information"
-       teammate  = successor.getAgentState(self.index2)
-       teammPos  = teammate.getPosition()
+    if len(invaders) > 0:
+      #record that the agents are offensive
+      for inv in invaders: self.offOpps[inv[0]] += 1
 
-
-       # Compute distance to the nearest food
-       foodList = self.getFood(successor).asList()
-       if len(foodList) > 0: # This should always be True,  but better safe than sorry
-         minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
-         features['distanceToFood'] = minDistance
-
-       # avoid an enemy ghost while on enemy side
-       enemies = []
-       for i in self.getOpponents(successor):
-         a = successor.getAgentState(i)
-         enemies.append(a)
-         if not a.isPacman and a.getPosition() != None:
-           self.defOpps[i] += 1
-           #print i,self.defOpps[i]
-
-       # make offense agent avoid y-axis of predicted defense agent
-       key = None
-       i   = None
-       for k in self.defOpps:
-         if key == None:
-           key = k
-           i = self.defOpps[k]
-         elif i > self.defOpps[k]:
-           key = k
-           i = self.defOpps[k]
-       if successor.getAgentState(key).getPosition() != None and successor.getAgentState(key).getPosition() !=None:
-         iPos    = successor.getAgentState(key).getPosition()
-         absDiff = abs(myPos[1] - iPos[1])
-         features['avoidDefY'] = absDiff
-
-
-
-
-
-       ghosts    = [a for a in enemies if not a.isPacman and a.getPosition() != None]
-       num_ghost = len(ghosts)
-
-
-       if num_ghost > 0:
-         dist = [(self.getMazeDistance(myPos,a.getPosition()), a) for a in ghosts]
-         if min(dist) < 7 and a.scaredTimer<2:
-           features['ghostDist'] = min(dist)
-         else:
-           features['ghostDist'] = 0
-
-
-       # if both agents are pacman, make them 
-       # stay away each other
-       if me.isPacman and teammate.isPacman:
-         t = teammate.getPosition()
-         if self.getMazeDistance(myPos, t) <5:
-           features['teamAttackDist'] = self.getMazeDistance(myPos,t)
-
-
-       #capsule feature to get close if close by
-       cap_dist = [self.getMazeDistance(myPos,a) for a in self.capsules]
-       if len(cap_dist)>0:
-         if min(cap_dist) < 8:
-           features['capsule'] = min(cap_dist)
-
-       # eat opponent pacman while in ghost state
-       if not me.isPacman:
-         if num_ghost>0: 
-           if min(dist) <4:
-             features['offGhostState'] = 1
-
-
-
-
-       
-
-
-       # promote not stoping
-       # should have feature that promotes exploring different areas
-       # after having a high distrution in an area
-       if action == Directions.STOP: features['stop'] = 1
-
-       if me.isPacman:
-         features['avoidDefY'] = 0
+      dists = [self.getMazeDistance(myPos, a[1].getPosition()) for a in invaders]
+      features['invaderDistance'] = min(dists)
       
-       #WRITE A BETTER TEAMMATE AVOIDANCE THING
-       features['avoidTeammate'] = 1
-     
-       return features
+      #stop caring about middle when there are invading pacmans
+      features['middleOpening'] = 0
+
+    if action == Directions.STOP: features['stop'] = 1
+    rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
+    if action == rev: features['reverse'] = 1
 
 
-    else:     
-       features = util.Counter()
-       successor = self.getSuccessor(gameState, action)
+    # punish defense for being pacman/on opposite side
+    if me.isPacman: features['remainGhost'] = 1
 
-       me = successor.getAgentState(self.index)
-       myPos = me.getPosition()
-
-       "info to get teammate information"
-       teammate  = successor.getAgentState(self.index2)
-       teammPos  = teammate.getPosition()
+    dOpenings = [self.getMazeDistance(myPos,q) for q in self.defensiveOpenings]
+    if len(dOpenings) > 0:
+      features['defensiveOpenings'] = min (dOpenings)
 
 
+    # team distance maintanence
+    t = teammate.getPosition()
+    if self.getMazeDistance(myPos, t) <2:
+      features['teamAttackDist'] = self.getMazeDistance(myPos,t)
 
-       # Computes whether we're on defense (1) or offense (0)
-       features['onDefense'] = 1
-       if me.isPacman: features['onDefense'] = 0
-
-       # Computes distance to invaders we can see
-       enemies = [(i, successor.getAgentState(i)) for i in self.getOpponents(successor)]
-       invaders = [a for a in enemies if a[1].isPacman and a[1].getPosition() != None]
-       features['numInvaders'] = len(invaders)
-
-
-       # make agent go to openings we are defending
-       features['middleOpening'] = self.getMazeDistance(myPos, self.middleOpening)
-
-       
-
-       if len(invaders) > 0:
-         #record that the agents are offensive
-         for inv in invaders: self.offOpps[inv[0]] += 1
-         print 'invaders'
-         dists = [self.getMazeDistance(myPos, a[1].getPosition()) for a in invaders]
-         features['invaderDistance'] = min(dists)
-         
-         #stop caring about middle when there are invading pacmans
-         features['middleOpening'] = 0
-       else:
-         print 'no invaders'
-       trackAgent = False
-       attackerDists = []
-       for k in self.offOpps.sortedKeys():
-         (agntI, n) = (k, self.offOpps[k])
-         if n > 2:
-            features['middleOpening'] = 0
-            trackAgent = True
-            attackerDists.append((successor.getAgentState(agntI).getPosition(), agntI))
-
-       features['trackOffense'] = 0
-       if trackAgent and len(invaders) < 1:
-         closestAgent = min(attackerDists)[1]
-         
-         if successor.getAgentState(closestAgent).getPosition() == None:
-            closestAgent = (closestAgent + 2) % 4
-         
-         if not successor.getAgentState(closestAgent).getPosition() == None:
-
-            (offX, offY) = successor.getAgentState(closestAgent).getPosition()
-            
-            bestOpening = self.middleOpening
-            bestDist = 10000
-            for openX, openY in self.defensiveOpenings:
-               yDist = abs(openY - offY)
-               if yDist < bestDist:
-                  bestOpening = (openX, openY)
-                  bestDist = yDist
-
-            features['trackOffense'] = self.getMazeDistance(myPos, bestOpening)
+    # make a feature to send pacman to a good start location
+    # middle of map at start
 
 
 
-       if action == Directions.STOP: features['stop'] = 1
-       rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
-       if action == rev: features['reverse'] = 1
-
-
-       # punish defense for being pacman/on opposite side
-       if me.isPacman: features['remainGhost'] = 1
-
-       dOpenings = [self.getMazeDistance(myPos,q) for q in self.defensiveOpenings]
-       if len(dOpenings) > 0:
-         features['defensiveOpenings'] = min (dOpenings)
-
-
-       # team distance maintanence
-       t = teammate.getPosition()
-       if self.getMazeDistance(myPos, t) <2:
-         features['teamAttackDist'] = self.getMazeDistance(myPos,t)
-
-       # make a feature to send pacman to a good start location
-       # middle of map at start
-
-
-
-       return features
+    return features
 
   def getWeights(self):
-    if not self.bothOffense:
-       return {'numInvaders': -200, 
-               'onDefense': 000, 
-               'invaderDistance': -100, 
-               'defensiveOpenings': -1,
-               'middleOpening': -1,
-               'stop': -10,
-               'trackOffense': 1,
-               'reverse': -00,
-               'teamAttackdist': 1,
-               'remainGhost': -2}
-    else:
-       return {'successorScore': 100, 
-            'distanceToFood': -5, 
-            'ghostDist': 15,
-            'teamAttackDist':5,
-            'avoidTeammate': 5,
-            'stop': -100,
-            'cap_dist':2,
-            'offGhostState':10,
-            'avoidDefY': 2}
-
+    return {'numInvaders': -200, 
+            'onDefense': 000, 
+            'invaderDistance': -100, 
+            'defensiveOpenings': -1,
+            'middleOpening': -1,
+            'stop': -10, 
+            'reverse': -00,
+            'teamAttackdist': 1,
+            'remainGhost': -2}
 
 class OffensiveReflexAgent(ReflexCaptureAgent):
   """
@@ -373,6 +209,10 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 
   def registerInitialState(self,gameState):
     ReflexCaptureAgent.registerInitialState(self,gameState)
+    self.defOpps = util.Counter()
+    self.defOpps[(self.index+1)%4]=0
+    self.defOpps[(self.index+3)%4]=0
+
   def getFeatures(self, gameState, action):
     # score feature
     features  = util.Counter()
@@ -462,8 +302,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
     # after having a high distrution in an area
     if action == Directions.STOP: features['stop'] = 1
 
-    if me.isPacman:
-      features['avoidDefY'] = 0
+
     
   
     return features
@@ -476,7 +315,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
             'stop': -100,
             'cap_dist':2,
             'offGhostState':10,
-            'avoidDefY': 2}
+            'avoidDefY': 1}
 
 
 
@@ -489,7 +328,7 @@ class OffensiveReflexAgent(ReflexCaptureAgent):
 
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first = 'OffensiveReflexAgent', second = 'DefensiveReflexAgent'):
+               first = 'OffensiveReflexAgent', second = 'OffensiveReflexAgent'):
   """
   This function should return a list of two agents that will form the
   team, initialized using firstIndex and secondIndex as their agent
